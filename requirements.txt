@@ -1,3 +1,4 @@
 torch == 1.12
 torchvision
 matplotlib
+torchinfo 
