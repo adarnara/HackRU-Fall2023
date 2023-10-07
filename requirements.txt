@@ -1,4 +1,4 @@
-torch == 1.12
+torch == 2.1.0
 torchvision
 matplotlib
 torchinfo 
@@ -6,3 +6,7 @@ fastapi==0.103.2
 uvicorn==0.23.2
 tqdm
 typing
+streamlit
+cv2
+numpy
+PIL
