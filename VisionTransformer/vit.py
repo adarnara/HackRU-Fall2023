@@ -9,14 +9,15 @@ import os
 from torchinfo import summary 
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
+from pathlib import Path
 
 
-device = "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 #get data
-image_path = "DermNet"
-train_dir = "Dermnet/train"
-test_dir = "Dermnet/test"
+image_path = "../DermNet"
+train_dir = f"{image_path}/train"
+test_dir = f"{image_path}/test"
 
 #preprocess data
 
@@ -55,7 +56,6 @@ def create_dataloaders(
 manual_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),])
-print(f"Manually created transforms: {manual_transforms}")
 
 train_dataloader, test_dataloader, class_names = create_dataloaders(
     train_dir=train_dir,
@@ -64,7 +64,6 @@ train_dataloader, test_dataloader, class_names = create_dataloaders(
     batch_size=32
 )
 
-print(f"{train_dataloader}, {test_dataloader}, {class_names}")
 
 #Replicating ViT Architecture
 
@@ -110,9 +109,6 @@ transformer_encoder_layer = nn.TransformerEncoderLayer(d_model=768,
                                                        activation="gelu",
                                                        batch_first=True,
                                                        norm_first=True)
-transformer_encoder_layer
-
-summary(model=transformer_encoder_layer, input_size=patch_embedding_obj_output.shape)
 
 transformer_encoder = nn.TransformerEncoder(
     encoder_layer=transformer_encoder_layer,
@@ -174,13 +170,8 @@ demo_img = torch.randn(1, 3, 224, 224).to(device)
 vit = VisionTransformer(num_classes=len(class_names)).to(device)
 vit(demo_img)
 
-summary(model=VisionTransformer(num_classes=3),
-        input_size=demo_img.shape)
-
-
 vit_weights = torchvision.models.ViT_B_16_Weights.DEFAULT 
 pretrained_vit = torchvision.models.vit_b_16(weights=vit_weights)
-
 
 for param in pretrained_vit.parameters():
   param.requires_grad = False
@@ -200,127 +191,101 @@ summary(model=pretrained_vit,
         row_settings=["var_names"]
 )
 
-def train_step(model: torch.nn.Module, 
-               dataloader: torch.utils.data.DataLoader, 
-               loss_fn: torch.nn.Module, 
-               optimizer: torch.optim.Optimizer,
-               device: torch.device) -> Tuple[float, float]:
-    """Trains a PyTorch model for a single epoch.
+def train_test_step(model, train_dataloader, test_dataloader, optimizer, loss_fn, epochs, device):
+   
+    criterion = loss_fn
+    train_losses = []
+    test_losses = []
+    true_values = []
+    predicted_values = []
+    num_epochs = epochs
 
-    Turns a target PyTorch model to training mode and then
-    runs through all of the required training steps (forward
-    pass, loss calculation, optimizer step).
+    for epoch in range(num_epochs):
+        print(f"Epoch {epoch+1}/{num_epochs}\n-------")
+        model.train()
+        train_loss_sum = 0.0
 
-    Args:
-    model: A PyTorch model to be trained.
-    dataloader: A DataLoader instance for the model to be trained on.
-    loss_fn: A PyTorch loss function to minimize.
-    optimizer: A PyTorch optimizer to help minimize the loss function.
-    device: A target device to compute on (e.g. "cuda" or "cpu").
+        print("Training:")
+        for batch, (images, values) in tqdm(enumerate(train_dataloader)):
+            images = images.to(device)
+            values = values.to(device)
+            outputs = model(images)
+            loss = criterion(outputs, values)
+            train_loss_sum += loss.item()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-    Returns:
-    A tuple of training loss and training accuracy metrics.
-    In the form (train_loss, train_accuracy). For example:
+        train_loss_sum /= len(train_dataloader)
+        train_losses.append(train_loss_sum)
+        model.eval()
+        test_loss_sum = 0.0
 
-    (0.1112, 0.8743)
-    """
-    # Put model in train mode
-    model.train()
+        print("Testing:")
+        with torch.no_grad():
+            for batch, (images, values) in tqdm(enumerate(test_dataloader)):
+                images = images.to(device)
+                values = values.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, values)
+                test_loss_sum += loss.item()
+            test_loss_sum /= len(test_dataloader)
+            test_losses.append(test_loss_sum)
+        
+        print(test_loss_sum + "" + train_loss_sum)
 
-    # Setup train loss and train accuracy values
-    train_loss, train_acc = 0, 0
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss
+            }, 'vit_hackru.pt')
 
-    # Loop through data loader data batches
-    for batch, (X, y) in enumerate(dataloader):
-        # Send data to target device
-        X, y = X.to(device), y.to(device)
+# test_data_paths = list(Path(test_dir).glob("*/*.jpg"))
+# test_labels = [path.parent.stem for path in test_data_paths]
 
-        # 1. Forward pass
-        y_pred = model(X)
+# def pred_and_store(test_paths, model, transform, class_names, device):
+#   test_pred_list = []
+#   for path in tqdm(test_paths):
+#     pred_dict = {}
+#     pred_dict["image_path"] = path
+#     class_name = path.parent.stem
+#     pred_dict["class_name"] = class_name
 
-        # 2. Calculate  and accumulate loss
-        loss = loss_fn(y_pred, y)
-        train_loss += loss.item() 
+#     from PIL import Image
+#     img = Image.open(path)
+#     transformed_image = transform(img).unsqueeze(0) 
+#     model.eval()
+#     with torch.inference_mode():
+#       pred_logit = model(transformed_image.to(device))
+#       pred_prob = torch.softmax(pred_logit, dim=1)
+#       pred_label = torch.argmax(pred_prob, dim=1)
+#       pred_class = class_names[pred_label.cpu()]
+#       pred_dict["pred_class"] = pred_class
+  
+#     pred_dict["correct"] = class_name == pred_class
+#     test_pred_list.append(pred_dict)
 
-        # 3. Optimizer zero grad
-        optimizer.zero_grad()
+#   return test_pred_list
 
-        # 4. Loss backward
-        loss.backward()
+# vit_transforms = vit_weights.transforms()
 
-        # 5. Optimizer step
-        optimizer.step()
+# test_pred_dicts = pred_and_store(test_paths=test_data_paths,
+#                                  model=pretrained_vit,
+#                                  transform=vit_transforms,
+#                                  class_names=class_names,
+#                                  device=device)
 
-        # Calculate and accumulate accuracy metric across all batches
-        y_pred_class = torch.argmax(torch.softmax(y_pred, dim=1), dim=1)
-        train_acc += (y_pred_class == y).sum().item()/len(y_pred)
-
-    # Adjust metrics to get average loss and accuracy per batch 
-    train_loss = train_loss / len(dataloader)
-    train_acc = train_acc / len(dataloader)
-    return train_loss, train_acc
-
-def test_step(model: torch.nn.Module, 
-              dataloader: torch.utils.data.DataLoader, 
-              loss_fn: torch.nn.Module,
-              device: torch.device) -> Tuple[float, float]:
-    model.eval() 
-
-    test_loss, test_acc = 0, 0
-    with torch.inference_mode():
-        for batch, (X, y) in enumerate(dataloader):
-            X, y = X.to(device), y.to(device)
-
-            test_pred_logits = model(X)
-
-            loss = loss_fn(test_pred_logits, y)
-            test_loss += loss.item()
-
-            test_pred_labels = test_pred_logits.argmax(dim=1)
-            test_acc += ((test_pred_labels == y).sum().item()/len(test_pred_labels))
-
-    test_loss = test_loss / len(dataloader)
-    test_acc = test_acc / len(dataloader)
-    return test_loss, test_acc
-
-def train(model: torch.nn.Module, 
-          train_dataloader: torch.utils.data.DataLoader, 
-          test_dataloader: torch.utils.data.DataLoader, 
-          optimizer: torch.optim.Optimizer,
-          loss_fn: torch.nn.Module,
-          epochs: int,
-          device: torch.device) -> Dict[str, List]:
-
-    results = {"train_loss": [],
-               "train_acc": [],
-               "test_loss": [],
-               "test_acc": []
-    }
+# test_pred_dicts[:1].values()
+ 
+if __name__ == '__main__':
+    optimizer = torch.optim.Adam(params=pretrained_vit.parameters(), lr=1e-3)
+    results = train_test_step(model=pretrained_vit,
+                    train_dataloader=train_dataloader,
+                    test_dataloader=test_dataloader,
+                    optimizer=optimizer,
+                    loss_fn=torch.nn.CrossEntropyLoss(),
+                    epochs=1,
+                    device=device)
     
-    model.to(device)
-
-    for epoch in tqdm(range(epochs)):
-        train_loss, train_acc = train_step(model=model,
-                                          dataloader=train_dataloader,
-                                          loss_fn=loss_fn,
-                                          optimizer=optimizer,
-                                          device=device)
-        test_loss, test_acc = test_step(model=model,
-          dataloader=test_dataloader,
-          loss_fn=loss_fn,
-          device=device)
-
-        print(
-          f"Epoch: {epoch+1} | "
-          f"train_loss: {train_loss:.4f} | "
-          f"train_acc: {train_acc:.4f} | "
-          f"test_loss: {test_loss:.4f} | "
-          f"test_acc: {test_acc:.4f}"
-        )
-
-        results["train_loss"].append(train_loss)
-        results["train_acc"].append(train_acc)
-        results["test_loss"].append(test_loss)
-        results["test_acc"].append(test_acc)
-
-    return results
+    
