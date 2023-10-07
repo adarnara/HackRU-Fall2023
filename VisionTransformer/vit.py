@@ -15,9 +15,9 @@ from pathlib import Path
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 #get data
-image_path = "DermNet"
-train_dir = "Dermnet/train"
-test_dir = "Dermnet/test"
+image_path = "../DermNet"
+train_dir = f"{image_path}/train"
+test_dir = f"{image_path}/test"
 
 #preprocess data
 
@@ -202,9 +202,7 @@ def train_test_step(model, train_dataloader, test_dataloader, optimizer, loss_fn
 
     for epoch in range(num_epochs):
         print(f"Epoch {epoch+1}/{num_epochs}\n-------")
-
         model.train()
-
         train_loss_sum = 0.0
 
         print("Training:")
@@ -225,69 +223,60 @@ def train_test_step(model, train_dataloader, test_dataloader, optimizer, loss_fn
 
         print("Testing:")
         with torch.no_grad():
-
             for batch, (images, values) in tqdm(enumerate(test_dataloader)):
                 images = images.to(device)
                 values = values.to(device)
-
                 outputs = model(images)
-
                 loss = criterion(outputs, values)
                 test_loss_sum += loss.item()
-
             test_loss_sum /= len(test_dataloader)
             test_losses.append(test_loss_sum)
+        
+        print(test_loss_sum + "" + train_loss_sum)
 
-test_data_paths = list(Path(test_dir).glob("*/*.jpg"))
-test_labels = [path.parent.stem for path in test_data_paths]
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss
+            }, 'vit_hackru.pt')
 
-# Create a function to return a list of dictionaries with sample, label, prediction, pred prob
-def pred_and_store(test_paths, model, transform, class_names, device):
-  test_pred_list = []
-  for path in tqdm(test_paths):
-    # Create empty dict to store info for each sample
-    pred_dict = {}
+# test_data_paths = list(Path(test_dir).glob("*/*.jpg"))
+# test_labels = [path.parent.stem for path in test_data_paths]
 
-    # Get sample path
-    pred_dict["image_path"] = path
+# def pred_and_store(test_paths, model, transform, class_names, device):
+#   test_pred_list = []
+#   for path in tqdm(test_paths):
+#     pred_dict = {}
+#     pred_dict["image_path"] = path
+#     class_name = path.parent.stem
+#     pred_dict["class_name"] = class_name
 
-    # Get class name
-    class_name = path.parent.stem
-    pred_dict["class_name"] = class_name
-
-    # Get prediction and prediction probability
-    from PIL import Image
-    img = Image.open(path) # open image
-    transformed_image = transform(img).unsqueeze(0) # transform image and add batch dimension
-    model.eval()
-    with torch.inference_mode():
-      pred_logit = model(transformed_image.to(device))
-      pred_prob = torch.softmax(pred_logit, dim=1)
-      pred_label = torch.argmax(pred_prob, dim=1)
-      pred_class = class_names[pred_label.cpu()]
-
-      # Make sure things in the dictionary are back on the CPU 
-      pred_dict["pred_prob"] = pred_prob.unsqueeze(0).max().cpu().item()
-      pred_dict["pred_class"] = pred_class
+#     from PIL import Image
+#     img = Image.open(path)
+#     transformed_image = transform(img).unsqueeze(0) 
+#     model.eval()
+#     with torch.inference_mode():
+#       pred_logit = model(transformed_image.to(device))
+#       pred_prob = torch.softmax(pred_logit, dim=1)
+#       pred_label = torch.argmax(pred_prob, dim=1)
+#       pred_class = class_names[pred_label.cpu()]
+#       pred_dict["pred_class"] = pred_class
   
-    # Does the pred match the true label?
-    pred_dict["correct"] = class_name == pred_class
+#     pred_dict["correct"] = class_name == pred_class
+#     test_pred_list.append(pred_dict)
 
-    # print(pred_dict)
-    # Add the dictionary to the list of preds
-    test_pred_list.append(pred_dict)
+#   return test_pred_list
 
-  return test_pred_list
+# vit_transforms = vit_weights.transforms()
 
-vit_transforms = vit_weights.transforms()
+# test_pred_dicts = pred_and_store(test_paths=test_data_paths,
+#                                  model=pretrained_vit,
+#                                  transform=vit_transforms,
+#                                  class_names=class_names,
+#                                  device=device)
 
-test_pred_dicts = pred_and_store(test_paths=test_data_paths,
-                                 model=pretrained_vit,
-                                 transform=vit_transforms,
-                                 class_names=class_names,
-                                 device=device)
-
-test_pred_dicts[:1]
+# test_pred_dicts[:1].values()
  
 if __name__ == '__main__':
     optimizer = torch.optim.Adam(params=pretrained_vit.parameters(), lr=1e-3)
@@ -298,3 +287,5 @@ if __name__ == '__main__':
                     loss_fn=torch.nn.CrossEntropyLoss(),
                     epochs=1,
                     device=device)
+    
+    
