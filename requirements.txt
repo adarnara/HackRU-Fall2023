@@ -4,3 +4,5 @@ matplotlib
 torchinfo 
 fastapi==0.103.2
 uvicorn==0.23.2
+tqdm
+typing
