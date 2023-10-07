@@ -1,3 +1,5 @@
 torch 
 torchvision
 matplotlib
+fastapi==0.103.2
+uvicorn==0.23.2
