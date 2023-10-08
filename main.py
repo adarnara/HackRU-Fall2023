@@ -3,16 +3,13 @@ from PIL import Image
 import torch
 from torchvision import transforms
 import vertexai
-import langchain
-from langchain.llms import VertexAI
-from langchain.indexes import VectorstoreIndexCreator
-import time
-from langchain.document_loaders import DirectoryLoader
-from langchain.embeddings import VertexAIEmbeddings
-from typing import List
-from pydantic import BaseModel
 
-st.set_page_config(page_title="Skin.AI")
+from langchain.llms import VertexAI
+import numpy as np
+import torchvision.transforms as T
+
+
+st.set_page_config(page_title="Skin.AI", layout = "wide")
 
 PROJECT_ID = "lustrous-baton-401321"  # @param {type:"string"}
 vertexai.init(project=PROJECT_ID, location="us-central1")
@@ -63,22 +60,29 @@ def load_image(image_file):
     return img
 
 def predict_skin_condition(model, image) -> int | str:
-    # Preprocess the input image (adjust this according to your model's requirements)
-    preprocess = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-    ])
-    input_tensor = preprocess(image).unsqueeze(0)
+    try:
 
-    # Make a prediction
-    with torch.no_grad():
-        output = model(input_tensor)
+        if isinstance(image, Image.Image):
 
-    predicted_class_index = torch.argmax(output, dim=1).item()
-    
-    predicted_class_name = class_dict.get(predicted_class_index, "Sorry, couldn't find a matching disease.")
+            preprocess = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+            ])
+            input_tensor = preprocess(image).unsqueeze(0)
 
-    return predicted_class_name
+            # Make a prediction
+            with torch.no_grad():
+                output = model(input_tensor).squeeze(0).softmax(0)
+
+            predicted_class_index = output.argmax().item()
+
+            predicted_class_name = class_dict.get(predicted_class_index, "Sorry, couldn't find a matching disease.")
+
+            return predicted_class_name
+        else:
+            return "Invalid image format. Please upload a valid image (JPEG or PNG)."
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 st.title("Skin.AI")
 st.write("*Vaishnav Venkat, Vignesh Venkat, Pranav Patil, Adarsh Narayanan*")
@@ -92,12 +96,17 @@ if photo_upload == "Upload an image":
         if st.button("Diagnose"):  # Add a button to trigger the diagnosis
             result = predict_skin_condition(model, load_image(file))
             st.header(f"Your Diagnosis:{result}")
+            st.write(generate_response(result))
 else:
     file = st.camera_input("Take a picture")
     if file:
-        st.image(file)
-        if st.button("Diagnose"):  # Add a button to trigger the diagnosis
-            result = predict_skin_condition(model, file)
-            st.header(f"Your Diagnosis:{result}")
+        if file is not None:
+            bytes_data = file.getvalue()
+            torch_img = torch.ops.image.decode_image(
+            torch.from_numpy(np.frombuffer(bytes_data, np.uint8)), 3)
+            transform = T.ToPILImage()
+            file = transform(torch_img)
+            if st.button("Diagnose"):
+                result = predict_skin_condition(model, file)
+                st.header(f"Your Diagnosis:{result}")
 
-st.write(generate_response(result))

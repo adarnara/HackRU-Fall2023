@@ -5,7 +5,7 @@ import os
 
 st.set_page_config(layout = "wide")
 current_directory = os.getcwd()
-st.write(current_directory)
+#st.write(current_directory)
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -30,3 +30,6 @@ with col4:
     st.subheader("Vaishnav Venkat")
     image_path = os.path.join(current_directory, "Pages/vaichuuu.jpeg")
     st.image(image_path)
+
+st.header("About Us:")
+st.write("Hello there! We are a team of four enthusiastic individuals gearing up for the hackathon. Each of us brings a unique set of skills and backgrounds to the table, making us a diverse and dynamic squad.")
