@@ -2,8 +2,32 @@ import streamlit as st
 from PIL import Image
 import torch
 from torchvision import transforms
+import vertexai
+import langchain
+from langchain.llms import VertexAI
+from langchain.indexes import VectorstoreIndexCreator
+import time
+from langchain.document_loaders import DirectoryLoader
+from langchain.embeddings import VertexAIEmbeddings
+from typing import List
+from pydantic import BaseModel
 
 st.set_page_config(page_title="Skin.AI")
+
+PROJECT_ID = "lustrous-baton-401321"  # @param {type:"string"}
+vertexai.init(project=PROJECT_ID, location="us-central1")
+
+result = ""
+def generate_response(input_text):
+    llm = VertexAI(
+    model_name="text-bison@001",
+    max_output_tokens=256,
+    temperature=0.1,
+    top_p=0.8,
+    top_k=40,
+    verbose=True,
+    )
+    return llm(f"How do I cure {input_text}")
 
 model = torch.load("vit_hackru.pt", map_location=torch.device('cpu'))
 
@@ -38,7 +62,7 @@ def load_image(image_file):
     img = Image.open(image_file)
     return img
 
-def predict_skin_condition(model, image):
+def predict_skin_condition(model, image) -> int | str:
     # Preprocess the input image (adjust this according to your model's requirements)
     preprocess = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -51,7 +75,7 @@ def predict_skin_condition(model, image):
         output = model(input_tensor)
 
     predicted_class_index = torch.argmax(output, dim=1).item()
-
+    
     predicted_class_name = class_dict.get(predicted_class_index, "Sorry, couldn't find a matching disease.")
 
     return predicted_class_name
@@ -76,6 +100,4 @@ else:
             result = predict_skin_condition(model, file)
             st.header(f"Your Diagnosis:{result}")
 
-
-
-
+st.write(generate_response(result))

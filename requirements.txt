@@ -9,8 +9,8 @@ typing
 streamlit
 opencv-python
 numpy 
-pillow
-langchain
+pillow==10.0.0
+langchain==0.0.229
 pydantic
 vertexai
 google-cloud-aiplatform==1.33.0
