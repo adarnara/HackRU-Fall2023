@@ -2,16 +2,21 @@ import streamlit as st
 import cv2
 import numpy as np
 from PIL import Image
+import fastapi
+
+st.set_page_config(page_title="Skin.AI")
 
 @st.cache_data
 def load_image(image_file):
     img = Image.open(image_file)
     return img
-st.set_page_config(page_title="Skin.AI")
-st.title("Skin.AI")
-st.write("*Vaishnav Venkat, Vignesh Venkat, Pranav Patil, Adarsh Narayan*")
 
-photo_upload = st.radio("Would you like to upload an image or take a photo now:", ["Upload an image", "Take a photo now"])
+#st.button()
+
+st.title("Skin.AI")
+st.write("*Vaishnav Venkat, Vignesh Venkat, Pranav Patil, Adarsh Narayanan*")
+
+photo_upload = st.radio("**Would you like to upload an image or take a photo now:**", ["Upload an image", "Take a photo now"])
 if photo_upload == "Upload an image":
     label = "Upload an image of your skin or use camera to take a photo(only .png and .jpeg files are accepted):"
     file = st.file_uploader(label, type=["png", "jpeg"])
@@ -30,5 +35,11 @@ if file is not None:
     #st.write(cv2_img)
 
 st.header("Your Diagnosis:")
+
 #st.write()
+
+prompt = st.chat_input("Ask any questions about your diagnosis")
+if prompt:
+    st.write(f"User has sent the following prompt:  {prompt}")
+
 
