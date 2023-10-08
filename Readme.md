@@ -17,12 +17,14 @@ The goal of this project is to provide a user-friendly and accessible tool for i
 
 ## GETTING STARTED
 Before you begin, make sure you have the proper prerequisites installed using:
+
 pip install -r requirements.txt
 
 Additionally, all files should be in HackRU-Fall2023 directory to run
 
 ## USAGE
 Use the following command to run the web app:
+
 streamlit run main.py
 
 ## HARDSHIPS
