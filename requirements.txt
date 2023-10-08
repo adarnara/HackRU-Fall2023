@@ -7,6 +7,10 @@ uvicorn==0.23.2
 tqdm
 typing
 streamlit
-cv2
-numpy
-PIL
+opencv-python
+numpy 
+pillow
+langchain
+pydantic
+vertexai
+google-cloud-aiplatform==1.33.0

@@ -1,0 +1,31 @@
+1. Expert Opin Emerg Drugs. 2021 Mar;26(1):17-26. doi: 
+10.1080/14728214.2021.1873949. Epub 2021 Jan 24.
+
+Emerging drugs for the treatment of basal cell carcinoma.
+
+Herms F(1), Basset-Seguin N(1).
+
+Author information:
+(1)Department of Dermatology, Université De Paris, Hôpital Saint-Louis, Paris, 
+France.
+
+Introduction: Basal cell carcinoma (BCC) is the most frequent skin malignancy, 
+with incidence increasing worldwide. Most BCC can be cured with local treatments 
+(surgery or topical therapies), but advanced or recurrent forms require specific 
+therapies. Significant developments targeting the sonic hedgehog signalization 
+pathway have been made in the past years, paving the way for new therapies.Areas 
+covered: This review details emerging drugs for BCC treatment, focusing on 
+topical, intra-tumoral, and systemic therapies, such as new targeted therapies 
+and immune checkpoint inhibitors. A literature search was conducted to identify 
+ongoing studies using PudMed database and clinicaltrials.gov website.Expert 
+opinion: Although surgery is and will probably remain the gold-standard therapy 
+for BCC, treatment of recurrent, advanced, and metastatic tumors is evolving. 
+Emergence of tumors resistant to targeted therapies lead the way to new 
+approaches. Topical and intra-tumoral treatments represent alternatives to 
+surgical morbidity, and many studies are ongoing. The first results of immune 
+checkpoint inhibitors are encouraging in advanced and metastatic forms of the 
+disease. New targeted therapies are needed to overcome or prevent the resistance 
+to standard hedgehog pathway inhibitors.
+
+DOI: 10.1080/14728214.2021.1873949
+PMID: 33412913 [Indexed for MEDLINE]

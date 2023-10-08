@@ -1,0 +1,32 @@
+1. Drug Discov Today. 2019 Dec;24(12):2234-2246. doi: 10.1016/j.drudis.2019.08.007. 
+Epub 2019 Sep 5.
+
+Soft drugs for dermatological applications: recent trends.
+
+Aprile S(1), Serafini M(1), Pirali T(2).
+
+Author information:
+(1)Department of Pharmaceutical Sciences, Università del Piemonte Orientale, 
+Largo Donegani 2, 28100 Novara, Italy.
+(2)Department of Pharmaceutical Sciences, Università del Piemonte Orientale, 
+Largo Donegani 2, 28100 Novara, Italy. Electronic address: 
+tracey.pirali@uniupo.it.
+
+A soft drug (SD) displays a metabolically labile spot and, after having exerted 
+its activity in the site of action, undergoes a fast metabolism, leading to 
+inactive metabolites. The SD approach has recently found widespread application 
+in the dermatological field because it provides a means of localising the 
+therapeutic effect in skin, while minimising systemic exposure. The literature 
+is rapidly growing of successful examples of compounds targeting 
+sphingosine-1-phosphate receptor 1 (S1PR1), transient receptor potential 
+vanilloid 1 (TRPV1), Janus kinase (JAK), caspase 1, and histone deacetylase 
+(HDAC), for the treatment of skin inflammatory, autoimmune, and oncological 
+diseases. As a demonstration of the potential of this strategy, the SD approach 
+recently led to the approval of crisaborole, a soft phosphodiesterase 4 (PDE4) 
+inhibitor, for atopic dermatitis, while other agents are in clinical 
+development.
+
+Copyright © 2019 Elsevier Ltd. All rights reserved.
+
+DOI: 10.1016/j.drudis.2019.08.007
+PMID: 31494188 [Indexed for MEDLINE]

@@ -11,11 +11,10 @@ from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 from pathlib import Path
 
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 #get data
-image_path = "../DermNet"
+image_path = "DermNet"
 train_dir = f"{image_path}/train"
 test_dir = f"{image_path}/test"
 
@@ -63,7 +62,6 @@ train_dataloader, test_dataloader, class_names = create_dataloaders(
     transform=manual_transforms, 
     batch_size=32
 )
-
 
 #Replicating ViT Architecture
 
@@ -241,43 +239,33 @@ def train_test_step(model, train_dataloader, test_dataloader, optimizer, loss_fn
             'loss': loss
             }, 'vit_hackru.pt')
 
-# test_data_paths = list(Path(test_dir).glob("*/*.jpg"))
-# test_labels = [path.parent.stem for path in test_data_paths]
+test_data_paths = list(Path(test_dir).glob("*/*.jpg"))
+test_labels = [path.parent.stem for path in test_data_paths]
 
-# def pred_and_store(test_paths, model, transform, class_names, device):
-#   test_pred_list = []
-#   for path in tqdm(test_paths):
-#     pred_dict = {}
-#     pred_dict["image_path"] = path
-#     class_name = path.parent.stem
-#     pred_dict["class_name"] = class_name
+def pred_and_store(test_paths, model, transform, class_names, device):
+  test_pred_list = []
+  for path in tqdm(test_paths):
+    pred_dict = {}
+    pred_dict["image_path"] = path
+    class_name = path.parent.stem
+    pred_dict["class_name"] = class_name
 
-#     from PIL import Image
-#     img = Image.open(path)
-#     transformed_image = transform(img).unsqueeze(0) 
-#     model.eval()
-#     with torch.inference_mode():
-#       pred_logit = model(transformed_image.to(device))
-#       pred_prob = torch.softmax(pred_logit, dim=1)
-#       pred_label = torch.argmax(pred_prob, dim=1)
-#       pred_class = class_names[pred_label.cpu()]
-#       pred_dict["pred_class"] = pred_class
+    from PIL import Image
+    img = Image.open(path)
+    transformed_image = transform(img).unsqueeze(0) 
+    model.eval()
+    with torch.inference_mode():
+      pred_logit = model(transformed_image.to(device))
+      pred_prob = torch.softmax(pred_logit, dim=1)
+      pred_label = torch.argmax(pred_prob, dim=1)
+      pred_class = class_names[pred_label.cpu()]
+      pred_dict["pred_class"] = pred_class
   
-#     pred_dict["correct"] = class_name == pred_class
-#     test_pred_list.append(pred_dict)
+    pred_dict["correct"] = class_name == pred_class
+    test_pred_list.append(pred_dict)
 
-#   return test_pred_list
+  return test_pred_list
 
-# vit_transforms = vit_weights.transforms()
-
-# test_pred_dicts = pred_and_store(test_paths=test_data_paths,
-#                                  model=pretrained_vit,
-#                                  transform=vit_transforms,
-#                                  class_names=class_names,
-#                                  device=device)
-
-# test_pred_dicts[:1].values()
- 
 if __name__ == '__main__':
     optimizer = torch.optim.Adam(params=pretrained_vit.parameters(), lr=1e-3)
     results = train_test_step(model=pretrained_vit,
@@ -288,4 +276,12 @@ if __name__ == '__main__':
                     epochs=1,
                     device=device)
     
+    vit_transforms = vit_weights.transforms()
+    test_pred_dicts = pred_and_store(test_paths=test_data_paths,
+                                 model=pretrained_vit,
+                                 transform=vit_transforms,
+                                 class_names=class_names,
+                                 device=device)
+
+    test_pred_dicts[:1].values()
     

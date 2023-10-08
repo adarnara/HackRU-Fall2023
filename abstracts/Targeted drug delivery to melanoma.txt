@@ -1,0 +1,35 @@
+1. Adv Drug Deliv Rev. 2018 Mar 1;127:208-221. doi: 10.1016/j.addr.2017.09.016. 
+Epub 2017 Sep 19.
+
+Targeted drug delivery to melanoma.
+
+Liu Q(1), Das M(2), Liu Y(2), Huang L(3).
+
+Author information:
+(1)Division of Pharmacoengineering and Molecular Pharmaceutics, Center for 
+Nanotechnology in Drug Delivery, Eshelman School of Pharmacy, University of 
+North Carolina at Chapel Hill, Chapel Hill, NC 27599, USA; UNC & NCSU Joint 
+Department of Biomedical Engineering, University of North Carolina at Chapel 
+Hill, Chapel Hill, NC 27599, USA.
+(2)Division of Pharmacoengineering and Molecular Pharmaceutics, Center for 
+Nanotechnology in Drug Delivery, Eshelman School of Pharmacy, University of 
+North Carolina at Chapel Hill, Chapel Hill, NC 27599, USA.
+(3)Division of Pharmacoengineering and Molecular Pharmaceutics, Center for 
+Nanotechnology in Drug Delivery, Eshelman School of Pharmacy, University of 
+North Carolina at Chapel Hill, Chapel Hill, NC 27599, USA; UNC & NCSU Joint 
+Department of Biomedical Engineering, University of North Carolina at Chapel 
+Hill, Chapel Hill, NC 27599, USA. Electronic address: leafh@unc.edu.
+
+Melanoma derived from melanocytes is the most aggressive genre of skin cancer. 
+Although the considerable advancement in the study of human cancer biology and 
+drug discovery, most advanced melanoma patients are inevitably unable to be 
+cured. With the emergence of nanotechnology, the use of nano-carriers is widely 
+expected to alter the landscape of melanoma treatment. In this review, we will 
+discuss melanoma biology, current treatment options, mechanisms behind drug 
+resistance, and nano-based solutions for effective anti-cancer therapy, followed 
+by challenges and perspectives in both pre-clinical and clinical settings.
+
+Published by Elsevier B.V.
+
+DOI: 10.1016/j.addr.2017.09.016
+PMID: 28939379 [Indexed for MEDLINE]
